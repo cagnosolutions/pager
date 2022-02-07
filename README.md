@@ -3,149 +3,11 @@ pager is a page manager
 
 ## Table of Contents
 - [Getting Started](#getting-started)
-- [Types & API's](#types--apis)
+- [Types](#types)
+    - [RecordID](#recordid)
     - [Page](#page)
     - [Page Manager](#page-manager)
     - [Page Buffer](#page-buffer)
-
-## Types & API's
-suff goes here... bla
-
-## Page
-this is a page
-
-```go
-
-    // returns a new page instance (most of the
-    // time you will not use this directly)
-    NewPage(pid uint32) *page
-
-    // returns the (un-fragmented) free space 
-    // remaining in the page  
-    FreeSpace() uint
-
-    // returns a boolean indicating if this
-    // page has been marked "free"
-    PageIsFree() bool
-    
-    // takes two pages and links their prev and
-    // next pointers in their headers, so they
-    // can be traversed in order
-    LinkPages(a, b *page) *page
-    
-    // simply a method form of the LinkPages
-    // function above, but otherwise provides 
-    // identical functionality 
-    Link(next *page) *page
-
-    // returns the ID of the page
-    PageID() uint32
-
-    // returns the prev page ID pointer
-    PrevID() uint32
-
-    // returns the next page ID pointer
-    NextID() uint32
-    
-    // checks the incoming record to see if
-    // the record is too small, too large or
-    // if there is enough room left
-    CheckRecord(recordSize uint16) error
-
-    // prefix sorts the records in the page
-    SortRecords()
-
-    // adds a new record to the page and
-    // returns a unique *RecordID
-    AddRecord(r []byte) (*RecordID, error)
-
-    // returns a record from the page using
-    // the supplied *RecordID
-    GetRecord(rid *RecordID) ([]byte, error)
-
-    // deletes a record from the page using
-    // the supplied *RecordID
-    DelRecord(rid *RecorID) error
-
-    // ranges the records in the page providing
-    // a functional iterator for accessing the
-    // page records in prefix sorted order
-    Range(fn func(rid *RecordID) bool)
-    
-    // resets the page to it's initial state
-    Reset()
-
-```
-
-## Page Manager
-this is the page manager
-
-```go
-    // allocates a new page 
-    AllocatePage() *page
-
-    // checks for any free pages it can use and if
-    // none are found it will allocate a new one  
-    GetFreeOrAllocate() *page
-    
-    // attempts to read and return a page off disk
-    // using the provided PageID
-    ReadPage(pid uint32) (*page, error)
-    
-    // attempts to write an in memory page to disk
-    WritePage(p *page) error
-
-    // attempts to delete a page (page is marked as
-    // a "free" page, so it can be recycled)
-    DeletePage(pid uint32) error
-    
-    // returns any PageID's for pages that have been
-    // removed or are listed as "free" 
-    GetFreePageIDs() []uint32
-
-    // returns the total number of pages the manager
-    // has a reference to (including any "free" pages)
-    PageCount() int
-    
-    // closes the manager (and the underlying file)
-    Close()
-
-```
-
-## Page Buffer
-this is the page buffer
-
-```go
-    // allocates a new page 
-    AllocatePage() *page
-
-    // checks for any free pages it can use and if
-    // none are found it will allocate a new one  
-    GetFreeOrAllocate() *page
-    
-    // attempts to read and return a page off disk
-    // using the provided PageID
-    ReadPage(pid uint32) (*page, error)
-    
-    // attempts to write an in memory page to disk
-    WritePage(p *page) error
-
-    // attempts to delete a page (page is marked as
-    // a "free" page, so it can be recycled)
-    DeletePage(pid uint32) error
-    
-    // returns any PageID's for pages that have been
-    // removed or are listed as "free" 
-    GetFreePageIDs() []uint32
-
-    // returns the total number of pages the manager
-    // has a reference to (including any "free" pages)
-    PageCount() int
-    
-    // closes the manager (and the underlying file)
-    Close()
-
-```
 
 ## Getting Started
 Import the package
@@ -227,4 +89,180 @@ And lastly, we can of course close the ***PageManager***
 	if err != nil {
 		panic(err)
 	}
+```
+
+## Types
+
+### RecordID
+```go
+// represents a record id
+type RecordID struct {
+	PageID uint32
+	SlotID uint16
+}
+```
+a record id bla bla...
+
+### Page
+```go
+// page is a page in memory and is unexported
+type page struct {
+	// contains unexported fields...
+}
+```
+A page is a single contiguous block of bytes 8KB in size. A page exists 
+in memory only unless it is persisted using the ****PageManager***. Remember,
+any action that modifies record data on a page is not persisted unless an 
+explicit call to *WritePage(p \*page)* is made by the ****PageManager***.
+
+### Methods of *page
+```go
+    // returns a new page instance (most of the
+    // time you will not use this directly)
+    NewPage(pid uint32) *page
+
+    // returns the (un-fragmented) free space 
+    // remaining in the page  
+    FreeSpace() uint
+
+    // returns a boolean indicating if this
+    // page has been marked "free"
+    PageIsFree() bool
+    
+    // takes two pages and links their prev and
+    // next pointers in their headers, so they
+    // can be traversed in order
+    LinkPages(a, b *page) *page
+    
+    // simply a method form of the LinkPages
+    // function above, but otherwise provides 
+    // identical functionality 
+    Link(next *page) *page
+
+    // returns the ID of the page
+    PageID() uint32
+
+    // returns the prev page ID pointer
+    PrevID() uint32
+
+    // returns the next page ID pointer
+    NextID() uint32
+    
+    // checks the incoming record to see if
+    // the record is too small, too large or
+    // if there is enough room left
+    CheckRecord(recordSize uint16) error
+
+    // prefix sorts the records in the page
+    SortRecords()
+
+    // adds a new record to the page and
+    // returns a unique *RecordID
+    AddRecord(r []byte) (*RecordID, error)
+
+    // returns a record from the page using
+    // the supplied *RecordID
+    GetRecord(rid *RecordID) ([]byte, error)
+
+    // deletes a record from the page using
+    // the supplied *RecordID
+    DelRecord(rid *RecorID) error
+
+    // ranges the records in the page providing
+    // a functional iterator for accessing the
+    // page records in prefix sorted order
+    Range(fn func(rid *RecordID) bool)
+    
+    // resets the page to it's initial state
+    Reset()
+```
+
+## Page Manager
+```go
+// PageManager manages pages and disk persistence
+type PageManager struct {
+	// contains unexported fields...
+}
+
+// a *PageManager takes a path in order to persist a file
+func NewPageManager(path string) (*PageManager, error)
+```
+A PageManager does page manager stuff...
+
+### Methods of *PageManager
+```go
+    // allocates a new page 
+    AllocatePage() *page
+
+    // checks for any free pages it can use and if
+    // none are found it will allocate a new one  
+    GetFreeOrAllocate() *page
+    
+    // attempts to read and return a page off disk
+    // using the provided PageID
+    ReadPage(pid uint32) (*page, error)
+    
+    // attempts to write an in memory page to disk
+    WritePage(p *page) error
+
+    // attempts to delete a page (page is marked as
+    // a "free" page, so it can be recycled)
+    DeletePage(pid uint32) error
+    
+    // returns any PageID's for pages that have been
+    // removed or are listed as "free" 
+    GetFreePageIDs() []uint32
+
+    // returns the total number of pages the manager
+    // has a reference to (including any "free" pages)
+    PageCount() int
+    
+    // closes the manager (and the underlying file)
+    Close() error
+
+```
+
+## Page Buffer
+```go
+// PageBuffer provides buffered page management
+type PageBuffer struct {
+	// contains unexported fields...
+}
+
+// a *PageBuffer instance takes a *PageManager
+func NewPageBuffer(pm *PageManager) (*PageBuffer, error)
+```
+A PageBuffer does buffered page management stuff...
+
+### Methods of *PageBuffer
+
+```go
+// adds a new record to the pinned page and
+// returns a unique *RecordID
+AddRecord(r []byte) (*RecordID, error)
+
+// returns a record from the pinned page using
+// the supplied *RecordID
+GetRecord(rid *RecordID) ([]byte, error)
+
+// deletes a record from the pinned page
+// using the supplied *RecordID
+DelRecord(rid *RecorID) error
+
+// returns the free space for the page associated
+// with the PageID provided
+FreeSpace(pid uint32) int
+
+// returns the total available free space 
+// for the combined pages in the *PageBuffer 
+TotalFreeSpace() int
+
+// returns the number of dirty pages
+DirtyPages() int
+
+// forces any dirty pages to disk
+Flush() error
+
+// closes the *PageBuffer (and the underlying *PageManager)
+Close() error
 ```
