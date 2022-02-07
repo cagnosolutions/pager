@@ -1,25 +1,19 @@
 # pager
 pager is a page manager
 
----
 ## Table of Contents
-- [A test](#a-test)
 - [Getting Started](#getting-started)
-    - [Installing](#installing)
-    - [Opening a database](#opening-a-database)
-    - [Transactions](#transactions)
-        - [Read-write transactions](#read-write-transactions)
-        - [Read-only transactions](#read-only-transactions)
-        - [Batch read-write transactions](#batch-read-write-transactions)
-        - [Managing transactions manually](#managing-transactions-manually)
-    - [Using buckets](#using-buckets)
-    - [Using key/value pairs](#using-keyvalue-pairs)
-    - [Autoincrementing integer for the bucket](#autoincrementing-integer-for-the-bucket)
-    - [Iterating over keys](#iterating-over-keys)
-        - [Prefix scans](#prefix-scans)
-        - [Range scans](#range-scans)
-        
-### API overview for the **page* type
+- [Types & API's](#types--apis)
+    - [Page](#page)
+    - [Page Manager](#page-manager)
+    - [Page Buffer](#page-buffer)
+
+## Types & API's
+suff goes here... bla
+
+## Page
+this is a page
+
 ```go
 
     // returns a new page instance (most of the
@@ -83,7 +77,9 @@ pager is a page manager
 
 ```
 
-### API overview for the **PageManager* type
+## Page Manager
+this is the page manager
+
 ```go
     // allocates a new page 
     AllocatePage() *page
@@ -115,11 +111,45 @@ pager is a page manager
     Close()
 
 ```
----
+
+## Page Buffer
+this is the page buffer
+
+```go
+    // allocates a new page 
+    AllocatePage() *page
+
+    // checks for any free pages it can use and if
+    // none are found it will allocate a new one  
+    GetFreeOrAllocate() *page
+    
+    // attempts to read and return a page off disk
+    // using the provided PageID
+    ReadPage(pid uint32) (*page, error)
+    
+    // attempts to write an in memory page to disk
+    WritePage(p *page) error
+
+    // attempts to delete a page (page is marked as
+    // a "free" page, so it can be recycled)
+    DeletePage(pid uint32) error
+    
+    // returns any PageID's for pages that have been
+    // removed or are listed as "free" 
+    GetFreePageIDs() []uint32
+
+    // returns the total number of pages the manager
+    // has a reference to (including any "free" pages)
+    PageCount() int
+    
+    // closes the manager (and the underlying file)
+    Close()
+
+```
 
 ## Getting Started
-
 Import the package
+
 ```go
 package main
 
