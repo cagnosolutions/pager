@@ -1,7 +1,5 @@
 package pager
 
-const defaultNumberOfPages = 8
-
 type pageMeta struct {
 	isDirty   bool
 	freeSpace uint16
@@ -43,7 +41,7 @@ func NewPageBufferSize(pm *PageManager, np int) (*PageBuffer, error) {
 }
 
 func NewPageBuffer(pm *PageManager) (*PageBuffer, error) {
-	return NewPageBufferSize(pm, defaultNumberOfPages)
+	return NewPageBufferSize(pm, defaultBufferedPageCount)
 }
 
 func (pb *PageBuffer) load() error {

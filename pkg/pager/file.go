@@ -4,6 +4,10 @@ import (
 	"sync"
 )
 
+//	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//	NOTE: this file will most likely be removed soon...
+//	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 // File is mainly just a synchronized
 // abstraction on top of a PageManager
 type File struct {
@@ -14,7 +18,7 @@ type File struct {
 }
 
 // OpenFile opens a File
-func OpenFile(path string, sync bool) (*File, error) {
+func _OpenFile(path string, sync bool) (*File, error) {
 	pm, err := OpenPageManager(path)
 	if err != nil {
 		return nil, err

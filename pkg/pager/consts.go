@@ -1,11 +1,15 @@
 package pager
 
 const (
+	// used in page
 	pageSize       = 8 << 10 // 8 KB
 	pageHeaderSize = 24      // 24 bytes
 	pageSlotSize   = 8       // 8 bytes
 	MinRecordSize  = pageSlotSize
 	MaxRecordSize  = pageSize - pageHeaderSize - pageSlotSize
+
+	// used in PageBuffer
+	defaultBufferedPageCount = 8
 )
 
 const (

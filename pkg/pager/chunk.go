@@ -1,5 +1,9 @@
 package pager
 
+//	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//	NOTE: this file will most likely be removed soon...
+//	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 type chunk struct {
 	pages []*page
 }
@@ -22,7 +26,7 @@ func genPrevID(cid uint32, i int) uint32 {
 	return 0
 }
 
-func NewChunk(cid uint32) *chunk {
+func _NewChunk(cid uint32) *chunk {
 	c := &chunk{
 		pages: make([]*page, 8),
 	}
