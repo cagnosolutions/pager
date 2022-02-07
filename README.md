@@ -2,20 +2,6 @@
 pager is a page manager
 
 ---
-
-Go to section
-* [Hello](#hello)
-* [Hello World](#hello-world)
-* [Another section](#new-section) <-- it's called 'Another section' in this list but refers to 'New section'
-
-Here is an [example label].
-
-[example label]: #the-anchor-name-or-id "Optional title for mouse hover"
-
-## Hello
-### Hello World
-## New section
-
 ## Table of Contents
 - [A test](#a-test)
 - [Getting Started](#getting-started)
@@ -32,9 +18,7 @@ Here is an [example label].
     - [Iterating over keys](#iterating-over-keys)
         - [Prefix scans](#prefix-scans)
         - [Range scans](#range-scans)
-
-### A Test 
-
+        
 ### API overview for the **page* type
 ```go
 
