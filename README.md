@@ -112,11 +112,11 @@ type page struct {
 // time you will not use this directly)
 NewPage(pid uint32) *page
 ```
-A page is a single contiguous block of bytes 8KB in size. A page exists 
+*page is a single contiguous block of bytes 8KB in size. A page exists 
 in memory only unless it is persisted using the ****PageManager***. Remember,
 any action that modifies record data on a page is not persisted unless an 
 explicit call to *WritePage(p \*page)* is made by the ****PageManager***.
-
+<br><br>****page is NOT guaranteed to be safe concurrently***
 ### Methods of *page
 ```go
 // returns the (un-fragmented) free space 
@@ -185,7 +185,11 @@ type PageManager struct {
 // a *PageManager takes a path in order to persist a file
 func NewPageManager(path string) (*PageManager, error)
 ```
-A PageManager does page manager stuff...
+****PageManager*** is responsible for allocating new pages and managing the direct
+I/O of the pages between disk and memory. It also keeps a small cache of previously
+used pages in an attempt to reuse deleted pages. When allocating new pages the
+****PageManager*** automatically generates and assigns each page with a unique PageID.
+<br><br>****PageManager is NOT guaranteed to be safe concurrently***
 
 ### Methods of *PageManager
 ```go
@@ -229,8 +233,14 @@ type PageBuffer struct {
 // a *PageBuffer instance takes a *PageManager
 func NewPageBuffer(pm *PageManager) (*PageBuffer, error)
 ```
-A PageBuffer does buffered page management stuff...
-
+****PageBuffer*** wraps a ****PageManager*** instance and provides a buffered
+set of pages (default 8 pages) to work with. One advantage to using a ****PageBuffer***
+is that it enables you to write records that would normally be too large to 
+fit inside one page--it takes care of the inter-page linking for you. It is 
+also synchronized, so it is safe to use concurrently. A ****PageBuffer*** may 
+periodically flush its contents to disk, but if you are not sure, make suer 
+you make a call to Flush(). 
+<br><br>****PageBuffer IS guaranteed to be safe concurrently***
 ### Methods of *PageBuffer
 
 ```go
