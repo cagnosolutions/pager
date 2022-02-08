@@ -5,7 +5,7 @@ import (
 	"github.com/cagnosolutions/pager/pkg/pager"
 )
 
-func main() {
+func main2() {
 
 	// open an instance of the page manager
 	manager, err := pager.OpenPageManager("path/to/data.db")

@@ -1,46 +1,145 @@
-# pager
-pager is a page manager
+## Overview
+
+***Even though pager aims to make certain lower-level operations easier, the
+aim is for it to be wrapped in larger structures. Most of the package is not 
+guaranteed to be thread-safe. To work with data in multiple goroutines it is
+recommended that locking is used to ensure only one goroutine can have access 
+at a time.**** 
+
+Pager attempts to bring some lower-level memory, filesystem, and data 
+management abstractions into a more approachable package. The aim is to keep 
+the API as simple as possible while still providing the necessary functions 
+required for record, page and data file management.
+
+The pager package provides methods for easily allocating and de-allocating 
+pages in memory. Simple read and write methods for swapping pages to and 
+from disk. In-page record management provides easy methods for reading, 
+writing, deleting and sorting records within a page. It also has a page
+buffer which provides a buffered page pool along with simple methods that
+wrap more complex and fine-grained operations like record overflowing and
+inter-page linking.
+
+## Technical Notes
+On the more technical end of things, the pages within this package are 
+implemented using a slotted-page scheme. This allows for easier sorting of 
+records within a page and also makes working with variable sized records 
+much easier. Each page also contains a header with previous and next page
+pointers (by default, they are not filled out) which makes it fairly simple
+to link pages together and create complex on disk structures like lists and
+trees. 
+
+*It should be noted that some components of the package obtain a file 
+lock on the data file being used, so multiple processes cannot open the same
+data file at the same time. Opening an already open data file may have 
+unintended side effects, and at the very least may cause it to hang until 
+the other process closes it.**
+
+## Requirements
+
+Requires Go version 1.17.x or later, no external dependencies are required.
+
+## Versioning
+This package uses [semantic versioning](http://semver.org), so the API may 
+change between major releases but not for patches and minor releases.
 
 ## Table of Contents
+
+- [Overview](#overview)
+- [Technical Notes](#overview)
+- [Requirements](#requirements)
+- [Versioning](#versioning)
 - [Getting Started](#getting-started)
-- [Types](#types)
+  - [Installing](#installing)
+  - [Importing](#importing)
+  - [Using the manager](#opening-the-page-manager)
+  - [Using pages](#using-pages)
+  - [Using records](#using-records)
+  - [Types](#types)
     - [RecordID](#recordid)
     - [Page](#page)
     - [Page Manager](#page-manager)
     - [Page Buffer](#page-buffer)
 
 ## Getting Started
-Import the package
 
-```go
-package main
-
-import (
-	"fmt"
-	"github.com/cagnosolutions/pager/pkg/pager"
-)
+### Installing
+First, make sure you meet the [requirements](#requirements), then simply
+run `go get`:
+```shell
+$ go get github.com/cagnosolutions/pager 
 ```
-Opening an instance of the ***PageManager***
+
+### Importing
+To use the pager package, import as:
 ```go
-manager, err := pager.OpenPageManager("path/to/data.db")
+import "github.com/cagnosolutions/pager/pkg/pager"
+```
+
+### Opening the page manager
+The `*PageManager` is one of the main top-level objects in this package. 
+It is represented as a single file on your disk. 
+```go
+mgr, err := pager.OpenPageManager("path/data.db")
+if err != nil {
+    panic(err)
+}
+defer m.Close()
+```
+
+### Using pages
+Each page holds collection of one or more records. Each page has a page 
+ID, which is represented as a `uint32`.
+```go
+// allocate a new page
+pg := mgr.AllocatePage()
+```
+Each page must have a unique ID. The `*PageManager` enforces unique page 
+ID's when allocating. *You can also allocate a new page directly by calling
+`NewPage(id uint32)`, but this is not recommended. If you do choose to use
+this second method of page allocation, it is expected that you will manage 
+and enforce the uniqueness of the page IDs.* 
+
+### Using records
+A record is just an arbitrary slice of bytes. To add a record to a page, use 
+the `AddRecord(data)` method of the page.
+```go
+// add a record to the page, keep track of the id
+id, err := pg.AddRecord([]byte("my first record"))
+if err != nil {
+	panic(err)
+}
+// It should be noted that the data we wrote to 
+// the page only exists in main memory right now
+```
+This will add `"my first record"` to the page `pg`. When you add a record
+to a page, it returns a `*RecordID` you can use to retrieve it. The action
+of adding a new record may produce an error if the record is empty, larger
+than the page itself, or if the page is out of room.
+
+To retrieve this record from the page, we can use the `GetRecord(id)` method
+of the page.
+```go
+// get a record from a page using the id
+r, err := pg.GetRecord(id)
+if err != nil {
+	panic(err)
+}
+fmt.Printf("id=%v, record=%q\n", id, r)
+// output:
+// id=&{1 2}, record="this is record one"
+```
+The `GetRecord(id)` method will return an error if the record cannot be found
+which may happen if the provided `*RecordID` is not valid. 
+
+Use the `DelRecord(id)` method to delete a record from the page.
+```go
+// delete record using id
+err = page.DelRecord(id)
 if err != nil {
 	panic(err)
 }
 ```
 
-Allocate a new page using the ***PageManager***
-```go
-page := manager.AllocatePage()
-```
-Add some data to the page--notice when you write a record to the page it returns a ***RecordID***
-```go
-id, err := page.AddRecord([]byte("this is record one"))
-if err != nil {
-	panic(err)
-}
-// It should be noted that the data we wrote to the page 
-// only exists in memory right now
-```
 Use the ***PageManager*** to persist any modified page data to disk
 ```go
 err = manager.WritePage(page)

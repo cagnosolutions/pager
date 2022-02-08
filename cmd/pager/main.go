@@ -6,7 +6,8 @@ import (
 )
 
 func main() {
-	testOverflowPage()
+	main2()
+	//testOverflowPage()
 	//pageMan()
 	//testRecordPrefix()
 }
@@ -301,21 +302,4 @@ func perr(err error) {
 	if err != nil {
 		fmt.Errorf("[file] remove: %s", err)
 	}
-}
-
-func testFile() {
-
-	// db file name
-	name := fmt.Sprintf("cmd/storage/pageman/data/file-%.4x.db", 1)
-
-	f, err := pager.OpenFile(name, true)
-	perr(err)
-
-	f.Range(func(rid *pager.RecordID) bool {
-		fmt.Printf("rid=%+v\n", rid)
-		return true
-	})
-
-	err = f.Close()
-	perr(err)
 }
