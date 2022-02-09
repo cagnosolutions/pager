@@ -1,17 +1,17 @@
 ## Overview
 ***Even though pager aims to make certain lower-level operations easier, the
 aim is for it to be wrapped in larger structures. Most of the package is not 
-guaranteed to be thread-safe. To work with data in multiple goroutines it is
+guaranteed to be thread-safe. To work with data in multiple goroutines, it is
 recommended that locking is used to ensure only one goroutine can have access 
 at a time.**** 
 
 Pager attempts to bring some lower-level memory, filesystem, and data 
 management abstractions into a more approachable package. The aim is to keep 
 the API as simple as possible while still providing the necessary functions 
-required for record, page and data file management.
+required for record, page, and data file management.
 
 The pager package provides methods for easily allocating and de-allocating 
-pages in memory. Simple read and write methods for swapping pages to and 
+pages in memory. Simple read and write methods for swapping pages to and
 from disk. In-page record management provides easy methods for reading, 
 writing, deleting and sorting records within a page. It also has a page
 buffer which provides a buffered page pool along with simple methods that
@@ -184,7 +184,7 @@ the action of reading and writing pages between main memory and the disk.****
 
 Use the manager's `WritePage(page)` method to ensure any record operations or
 page mutations are persisted to the disk. It will return an error if the
-manager, or the underlying file has been closed. 
+manager or the underlying file has been closed. 
 ```go
 // write page to disk
 err = mgr.WritePage(pg)
