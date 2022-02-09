@@ -209,7 +209,7 @@ if err != nil {
 
 ## Types
 
-### RecordID
+### RecordID <span style="font-size:0.6em;vertical-align:top;">[*src][1]</span>
 A `*RecordID` is returned after a record is written to a page. It is the 
 primary ID used to locate a record, return a record and to delete a record
 within a page.
@@ -224,7 +224,7 @@ type RecordID struct {
 }
 ```
 
-### Page
+### Page <span style="font-size:0.6em;vertical-align:top;">[*src][2]</span>
 A `page` is an unexported type, and it is something that is never directly
 accessed. However, it does have several methods that may be used for managing 
 records. It also contains a few "getters" and "setters" for accessing a page's
@@ -245,7 +245,7 @@ memory only unless it is manually persisted. Any action that modifies record
 data on a page is not persisted unless an explicit call to `WritePage(page)` 
 is made by the manager.
 
-### Page Manager
+### Page Manager <span style="font-size:0.6em;vertical-align:top;">[*src][3]</span>
 ```go
 // PageManager manages instances of
 // pages, and swapping between disk
@@ -264,7 +264,7 @@ pages that have been de-allocated (aka deleted). When allocating new pages
 the `PageManager` automatically generates and assigns each page with a 
 unique ID.
 
-### Page Buffer [*][page-buffer-source]
+### Page Buffer <span style="font-size:0.6em;vertical-align:top;">[*src][4]</span>
 ```go
 // PageBuffer provides buffered page
 // management, and access to larger
@@ -281,11 +281,7 @@ pages (default 8 pages) to work with. One advantage to using a `PageBuffer`
 is that it enables you to write records that would normally be too large to 
 fit inside one page--it takes care of the inter-page linking for you. 
 
-[Text1][1] will link to [1] the first link, and [Text2][2] to the second.
-You [can reuse][1] names, and give longer names [like this one][a link].
-You can also link text [like this] without giving the reference an explicit name.
-
-[page-buffer-source]: /pkg/pager/buffer.go
-[2]: http://stackoverflow.com/
-[a link]: http://example.org/
-[like this]: http://stackexchange.com/
+[1]: /pkg/pager/page.go#L0 ("record id source")
+[2]: /pkg/pager/page.go#L0 ("page source")
+[3]: /pkg/pager/manager.go#L8 ("page manager source")
+[4]: /pkg/pager/buffer.go#L8 ("page buffer source")
