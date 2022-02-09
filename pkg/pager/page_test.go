@@ -8,7 +8,7 @@ import (
 
 var recordIDs []*RecordID
 
-func addRecords(pg *page) []*RecordID {
+func addRecords(pg *Page) []*RecordID {
 	var recs []*RecordID
 	for i := 0; i < 10; i++ {
 		rec := fmt.Sprintf("this-is-record-%.6x", i)
@@ -27,7 +27,7 @@ func TestPage_AddRecord(t *testing.T) {
 		rec := fmt.Sprintf("this-is-record-%.6x", i)
 		rid, err := pg.AddRecord([]byte(rec))
 		if err != nil {
-			t.Errorf("[page] adding record: %s", err)
+			t.Errorf("[Page] adding record: %s", err)
 		}
 		recordIDs = append(recordIDs, rid)
 	}
@@ -39,7 +39,7 @@ func TestPage_GetRecord(t *testing.T) {
 	for _, rid := range recs {
 		rec, err := pg.GetRecord(rid)
 		if err != nil {
-			t.Errorf("[page] getting record: %s", err)
+			t.Errorf("[Page] getting record: %s", err)
 		}
 		fmt.Printf("%v: %q\n", rid, rec)
 	}
@@ -54,7 +54,7 @@ func TestPage_DelRecord(t *testing.T) {
 	for _, rid := range recs {
 		rec, err := pg.GetRecord(rid)
 		if err != nil {
-			t.Errorf("[page] getting record: %s", err)
+			t.Errorf("[Page] getting record: %s", err)
 		}
 		fmt.Printf("%v: %q\n", rid, rec)
 	}
@@ -64,7 +64,7 @@ func TestPage_DelRecord(t *testing.T) {
 		if i%2 == 0 {
 			err := pg.DelRecord(rid)
 			if err != nil {
-				t.Errorf("[page] deleting record: %s", err)
+				t.Errorf("[Page] deleting record: %s", err)
 			}
 		}
 	}
@@ -74,7 +74,7 @@ func TestPage_DelRecord(t *testing.T) {
 		rec, err := pg.GetRecord(rid)
 		if i%2 != 0 {
 			if err != nil {
-				t.Errorf("[page] getting record: %s", err)
+				t.Errorf("[Page] getting record: %s", err)
 			}
 			fmt.Printf("%v: %q\n", rid, rec)
 		} else {
@@ -91,7 +91,7 @@ func TestPage_Range(t *testing.T) {
 	pg.Range(func(rid *RecordID) bool {
 		rec, err := pg.GetRecord(rid)
 		if err != nil {
-			t.Errorf("[page] getting record: %s", err)
+			t.Errorf("[Page] getting record: %s", err)
 		}
 		fmt.Printf("%v: %q\n", rid, rec)
 		return true
@@ -103,7 +103,7 @@ func TestLinkPages(t *testing.T) {
 	pg2 := NewPage(2)
 	pg1 = pg1.Link(pg2)
 	if pg1.NextID() != pg2.PageID() || pg2.PrevID() != pg1.PageID() {
-		t.Errorf("[page] linking pages: %s", "error linking pages")
+		t.Errorf("[Page] linking pages: %s", "error linking pages")
 	}
 }
 
@@ -115,12 +115,12 @@ func Test_pageHeader_FreeSpace(t *testing.T) {
 		// write 10 bytes in each record
 		_, err := pg.AddRecord([]byte("=========~"))
 		if err != nil {
-			t.Errorf("[page] adding record: %s", err)
+			t.Errorf("[Page] adding record: %s", err)
 		}
 	}
 	fmt.Printf("%s\n", pg)
 	if estimatedFreeSpace != int(pg.header.FreeSpace()) {
-		t.Errorf("[page] estimatedFreeSpace=%d, actualFreeSpace=%d",
+		t.Errorf("[Page] estimatedFreeSpace=%d, actualFreeSpace=%d",
 			estimatedFreeSpace, pg.header.FreeSpace())
 	}
 

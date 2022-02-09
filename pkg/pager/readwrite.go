@@ -43,7 +43,7 @@ func readPageHeader(r io.ReadSeeker, h *pageHeader) (int, error) {
 	h.hasOverflow = binary.LittleEndian.Uint16(buf[20:22])
 	// decode reserved
 	h.reserved = binary.LittleEndian.Uint16(buf[22:24])
-	// seek to the start of the next page header
+	// seek to the start of the next Page header
 	nn, err := r.Seek(int64(pageSize-n), io.SeekCurrent)
 	if err != nil {
 		return int(nn) + n, err
@@ -53,7 +53,7 @@ func readPageHeader(r io.ReadSeeker, h *pageHeader) (int, error) {
 }
 
 func decodePageHeader(b []byte, h *pageHeader) int {
-	// get offset to decode page header directly into page data
+	// get offset to decode Page header directly into Page data
 	var n int
 	// decode PageID
 	h.pageID = binary.LittleEndian.Uint32(b[n : n+4])
@@ -87,7 +87,7 @@ func decodePageHeader(b []byte, h *pageHeader) int {
 }
 
 func encodePageHeader(b []byte, h *pageHeader) int {
-	// get offset to encode page header directly into page data
+	// get offset to encode Page header directly into Page data
 	var n int
 	// encode PageID
 	binary.LittleEndian.PutUint32(b[n:n+4], h.pageID)
@@ -120,21 +120,21 @@ func encodePageHeader(b []byte, h *pageHeader) int {
 	return n
 }
 
-func readPage(r io.Reader, p *page) (int, error) {
-	// init page data
+func readPage(r io.Reader, p *Page) (int, error) {
+	// init Page data
 	p.data = make([]byte, pageSize)
-	// read page data
+	// read Page data
 	nn, err := r.Read(p.data)
 	if err != nil {
 		return -1, err
 	}
-	// init page header
+	// init Page header
 	p.header = new(pageHeader)
-	// decode page header
+	// decode Page header
 	n := decodePageHeader(p.data[0:pageHeaderSize], p.header)
-	// init page slots
+	// init Page slots
 	p.slots = make([]*pageSlot, p.header.slotCount)
-	// decode page slots
+	// decode Page slots
 	for i := range p.slots {
 		// create a new pageSlot pointer
 		p.slots[i] = new(pageSlot)
@@ -155,24 +155,24 @@ func readPage(r io.Reader, p *page) (int, error) {
 	return nn, nil
 }
 
-func readPageAt(r io.ReaderAt, offset int64) (*page, error) {
-	// init new page
-	p := new(page)
-	// init new page data
+func readPageAt(r io.ReaderAt, offset int64) (*Page, error) {
+	// init new Page
+	p := new(Page)
+	// init new Page data
 	p.data = make([]byte, pageSize)
-	// read page data into page from the
+	// read Page data into Page from the
 	// underlying pageManagerFile at the offset provided
 	_, err := r.ReadAt(p.data, offset)
 	if err != nil {
 		return nil, err
 	}
-	// init page header
+	// init Page header
 	p.header = new(pageHeader)
-	// decode page header
+	// decode Page header
 	n := decodePageHeader(p.data[0:pageHeaderSize], p.header)
-	// init page slots
+	// init Page slots
 	p.slots = make([]*pageSlot, p.header.slotCount)
-	// decode page slots
+	// decode Page slots
 	for i := range p.slots {
 		// create a new pageSlot pointer
 		p.slots[i] = new(pageSlot)
@@ -189,14 +189,14 @@ func readPageAt(r io.ReaderAt, offset int64) (*page, error) {
 		p.slots[i].itemLength = binary.LittleEndian.Uint16(p.data[n : n+2])
 		n += 2
 	}
-	// return read page
+	// return read Page
 	return p, nil
 }
 
-func writePage(w io.Writer, p *page) (int, error) {
-	// encode page header
+func writePage(w io.Writer, p *Page) (int, error) {
+	// encode Page header
 	n := encodePageHeader(p.data[0:pageHeaderSize], p.header)
-	// encode page slots
+	// encode Page slots
 	for i := range p.slots {
 		// encode slot item prefix
 		binary.LittleEndian.PutUint16(p.data[n:n+2], p.slots[i].itemID)
@@ -211,7 +211,7 @@ func writePage(w io.Writer, p *page) (int, error) {
 		binary.LittleEndian.PutUint16(p.data[n:n+2], p.slots[i].itemLength)
 		n += 2
 	}
-	// write page data
+	// write Page data
 	nn, err := w.Write(p.data)
 	if err != nil {
 		return nn, err
@@ -220,10 +220,10 @@ func writePage(w io.Writer, p *page) (int, error) {
 	return nn, nil
 }
 
-func writePageAt(w io.WriterAt, p *page, offset int64) (int, error) {
-	// encode page header
+func writePageAt(w io.WriterAt, p *Page, offset int64) (int, error) {
+	// encode Page header
 	n := encodePageHeader(p.data[0:pageHeaderSize], p.header)
-	// encode page slots
+	// encode Page slots
 	for i := range p.slots {
 		// encode slot item prefix
 		binary.LittleEndian.PutUint16(p.data[n:n+2], p.slots[i].itemID)
@@ -238,7 +238,7 @@ func writePageAt(w io.WriterAt, p *page, offset int64) (int, error) {
 		binary.LittleEndian.PutUint16(p.data[n:n+2], p.slots[i].itemLength)
 		n += 2
 	}
-	// write page data to the underlying
+	// write Page data to the underlying
 	// pageManagerFile at the offset provided
 	nn, err := w.WriteAt(p.data, offset)
 	if err != nil {
@@ -249,11 +249,11 @@ func writePageAt(w io.WriterAt, p *page, offset int64) (int, error) {
 }
 
 func deletePageAt(w io.WriterAt, pid uint32, offset int64) (int, error) {
-	// create a new "empty" page
+	// create a new "empty" Page
 	p := NewPage(pid)
-	// encode page header
+	// encode Page header
 	n := encodePageHeader(p.data[0:pageHeaderSize], p.header)
-	// encode page slots
+	// encode Page slots
 	for i := range p.slots {
 		// encode slot item prefix
 		binary.LittleEndian.PutUint16(p.data[n:n+2], p.slots[i].itemID)
@@ -268,7 +268,7 @@ func deletePageAt(w io.WriterAt, pid uint32, offset int64) (int, error) {
 		binary.LittleEndian.PutUint16(p.data[n:n+2], p.slots[i].itemLength)
 		n += 2
 	}
-	// write page data to the underlying
+	// write Page data to the underlying
 	// pageManagerFile at the offset provided
 	nn, err := w.WriteAt(p.data, offset)
 	if err != nil {

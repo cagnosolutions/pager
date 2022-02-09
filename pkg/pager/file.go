@@ -13,7 +13,7 @@ import (
 type File struct {
 	mu     sync.RWMutex
 	pm     *PageManager
-	pp     *page // ptr to the most recently allocated page
+	pp     *Page // ptr to the most recently allocated Page
 	doSync bool
 }
 
@@ -63,7 +63,7 @@ func (f *File) Write(record []byte) (*RecordID, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 tryagain:
-	// write record to page data
+	// write record to Page data
 	rid, err := f.pp.AddRecord(record)
 	if err != nil {
 		// check to see if it's a space issue
@@ -86,10 +86,10 @@ func (f *File) Read(recordID *RecordID) ([]byte, error) {
 	// read lock
 	f.mu.RLock()
 	defer f.mu.RUnlock()
-	// if the record is in the current page
+	// if the record is in the current Page
 	// then we don't have to read it!
 	if recordID.PageID == f.pp.header.pageID {
-		// get the record from our page cache
+		// get the record from our Page cache
 		rec, err := f.pp.GetRecord(recordID)
 		if err != nil {
 			return nil, err
@@ -97,7 +97,7 @@ func (f *File) Read(recordID *RecordID) ([]byte, error) {
 		// go it!
 		return rec, nil
 	}
-	// otherwise, we must read the page in...
+	// otherwise, we must read the Page in...
 	pg, err := f.pm.ReadPage(recordID.PageID)
 	if err != nil {
 		return nil, err

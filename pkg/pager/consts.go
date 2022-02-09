@@ -1,7 +1,7 @@
 package pager
 
 const (
-	// used in page
+	// used in Page
 	pageSize       = 8 << 10 // 8 KB
 	pageHeaderSize = 24      // 24 bytes
 	pageSlotSize   = 8       // 8 bytes

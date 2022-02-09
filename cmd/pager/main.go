@@ -5,8 +5,8 @@ import (
 	"github.com/cagnosolutions/pager/pkg/pager"
 )
 
-func main() {
-	main2()
+func _main() {
+	//main2()
 	//testOverflowPage()
 	//pageMan()
 	//testRecordPrefix()

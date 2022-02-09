@@ -7,16 +7,16 @@ type pageMeta struct {
 
 type PageBuffer struct {
 	manager *PageManager
-	buffer  []*page
+	buffer  []*Page
 	metas   []pageMeta
 	pinned  int
 }
 
 func NewPageBufferSize(pm *PageManager, np int) (*PageBuffer, error) {
-	// create page buffer
+	// create Page buffer
 	pb := &PageBuffer{
 		manager: pm,
-		buffer:  make([]*page, np),
+		buffer:  make([]*Page, np),
 		metas:   make([]pageMeta, np),
 		pinned:  0,
 	}
@@ -45,14 +45,14 @@ func NewPageBuffer(pm *PageManager) (*PageBuffer, error) {
 }
 
 func (pb *PageBuffer) load() error {
-	// get the page count that the manager has
+	// get the Page count that the manager has
 	pageCount := len(pb.manager.pageHeaders)
 	// check to see if we need to allocate any
-	// new or initial pages for the page buffer
+	// new or initial pages for the Page buffer
 	if pageCount == 0 {
 		// no pages are currently allocated
 		for i := 0; i < len(pb.buffer); i++ {
-			// so, we must allocate a new page
+			// so, we must allocate a new Page
 			// and append it to our buffer
 			pb.buffer[i] = pb.manager.AllocatePage()
 			// and now we are done with this case
@@ -66,8 +66,8 @@ func (pb *PageBuffer) load() error {
 	if pageCount > 0 && pageCount <= 8 {
 		// let's get the remaining pages allocated
 		for i := 0; i < len(pb.buffer)-pageCount; i++ {
-			// allocate a new page and append it to
-			// our page buffer page set
+			// allocate a new Page and append it to
+			// our Page buffer Page set
 			pb.buffer[i] = pb.manager.AllocatePage()
 			// and we are done with this case
 		}
@@ -75,25 +75,25 @@ func (pb *PageBuffer) load() error {
 		return nil
 	}
 	// otherwise, we most likely have a reference to
-	// more than 8 page in the manager, so (in this
+	// more than 8 Page in the manager, so (in this
 	// instance) we will simply load the first 8 into
-	// the page buffer
+	// the Page buffer
 	if pageCount > 8 {
 		// let's get the first eight pages from the manager
 		for i := 0; i < len(pb.buffer); i++ {
 			// so, we range the first 8 from the manager
-			// and load them into the page buffer by first
-			// getting the page id we need to read in
+			// and load them into the Page buffer by first
+			// getting the Page id we need to read in
 			pid := pb.manager.pageHeaders[i].pageID
-			// read the page using the manager
+			// read the Page using the manager
 			p, err := pb.manager.ReadPage(pid)
 			if err != nil {
 				return err
 			}
 			// as long as we didn't get any errors
 			// we should be right as rain as they
-			// say; append our page to the buffer
-			// along with any and all other page
+			// say; append our Page to the buffer
+			// along with any and all other Page
 			// metadata that we need.
 			pb.buffer[i] = p
 			pb.metas[i] = pageMeta{
@@ -118,12 +118,12 @@ func (pb *PageBuffer) AddRecord(r []byte) (*RecordID, error) {
 		return nil, ErrWritingPage
 	}
 	// then check to see if the record is small
-	// enough to simply fit inside on page
+	// enough to simply fit inside on Page
 	if size < MaxRecordSize {
 		// if the record size is small enough to fit
-		// in one page then write get the pinned page
+		// in one Page then write get the pinned Page
 		p := pb.buffer[pb.pinned]
-		// and write the record to the pinned page
+		// and write the record to the pinned Page
 		rid, err := p.AddRecord(r)
 		if err != nil {
 			return nil, err

@@ -6,11 +6,12 @@ import (
 	"path/filepath"
 )
 
-// PageManager is a slotted page PageManager manager
+// PageManager is a slotted Page PageManager manager
 type PageManager struct {
 	name        string
 	fp          *os.File
 	pageHeaders []*pageHeader
+	pageCache   *Page
 	freePages   int
 	pids        *autoPageID
 }
@@ -51,7 +52,7 @@ func OpenPageManager(path string) (*PageManager, error) {
 	if err != nil {
 		return nil, err
 	}
-	// create page PageManager
+	// create Page PageManager
 	f := &PageManager{
 		name:        filepath.Join(dir, name),
 		fp:          fp,
@@ -63,12 +64,12 @@ func OpenPageManager(path string) (*PageManager, error) {
 	if err != nil {
 		return nil, err
 	}
-	// return page PageManager
+	// return Page PageManager
 	return f, nil
 }
 
 // load files out the meta ([]*pageHeader) slice
-// in the page pageManagerFile for easier page handling
+// in the Page pageManagerFile for easier Page handling
 func (f *PageManager) load() error {
 	// get PageManager size info
 	fi, err := f.fp.Stat()
@@ -81,9 +82,9 @@ func (f *PageManager) load() error {
 		return nil
 	}
 	// otherwise, there should be
-	// page headers we can load in
+	// Page headers we can load in
 	for {
-		// read page header data
+		// read Page header data
 		var h pageHeader
 		_, err := readPageHeader(f.fp, &h)
 		// check for an error
@@ -95,7 +96,7 @@ func (f *PageManager) load() error {
 		}
 		// add to list
 		f.pageHeaders = append(f.pageHeaders, &h)
-		// increment page id's
+		// increment Page id's
 		f.pids.getNewPageID()
 		// check for free pageHeaders
 		if h.PageIsFree() {
@@ -110,35 +111,35 @@ func (f *PageManager) load() error {
 	return nil
 }
 
-// getPagePosition calculates the page position based
+// getPagePosition calculates the Page position based
 // on the pageID provided
 func getPagePosition(pid uint32) int64 {
 	return int64(align(int(pid*pageSize), pageSize-1))
 }
 
-// AllocatePage allocates and returns a new page. The
-// newly allocated page is not persisted unless a call
+// AllocatePage allocates and returns a new Page. The
+// newly allocated Page is not persisted unless a call
 // to WritePage is made
-func (f *PageManager) AllocatePage() *page {
-	// generate new atomic page id
+func (f *PageManager) AllocatePage() *Page {
+	// generate new atomic Page id
 	pid := f.pids.getNewPageID()
-	// create and return a new page
+	// create and return a new Page
 	return NewPage(pid)
 }
 
-// GetFreeOrAllocate attempts to find a free page (a
-// page that is not in use that can be reused) and if
+// GetFreeOrAllocate attempts to find a free Page (a
+// Page that is not in use that can be reused) and if
 // one cannot be found, it will allocate and return a
-// new one. Any alterations to the returned page are
+// new one. Any alterations to the returned Page are
 // not persisted unless a call to WritePage is made
-func (f *PageManager) GetFreeOrAllocate() *page {
-	// first check the free page count
+func (f *PageManager) GetFreeOrAllocate() *Page {
+	// first check the free Page count
 	if f.freePages > 0 {
 		// looks like we indeed have some free pageHeaders, so
-		// let's iterate all the page headers that the
+		// let's iterate all the Page headers that the
 		// PageManager has and try to find a free one
 		for _, h := range f.pageHeaders {
-			// checking if page is free
+			// checking if Page is free
 			if h.PageIsFree() {
 				// found one, return it!
 				p, err := f.ReadPage(h.pageID)
@@ -148,7 +149,7 @@ func (f *PageManager) GetFreeOrAllocate() *page {
 				}
 				// we should be in the clear to decrement
 				// the freePages counter, and return our
-				// found page
+				// found Page
 				f.freePages--
 				return p
 			}
@@ -158,69 +159,69 @@ func (f *PageManager) GetFreeOrAllocate() *page {
 	// count, so we must create and return a fresh one,
 	// but first we need a fresh pageID
 	pid := f.pids.getNewPageID()
-	// create and return a new page with our fresh pageID
+	// create and return a new Page with our fresh pageID
 	return NewPage(pid)
 }
 
-// ReadPage attempts to read the page located at the
+// ReadPage attempts to read the Page located at the
 // offset calculated by the provided pageID. It returns
-// an error if a page could not be located
-func (f *PageManager) ReadPage(pid uint32) (*page, error) {
-	// calc page offset in PageManager
+// an error if a Page could not be located
+func (f *PageManager) ReadPage(pid uint32) (*Page, error) {
+	// calc Page offset in PageManager
 	offset := getPagePosition(pid)
-	// read data into new page
+	// read data into new Page
 	p, err := readPageAt(f.fp, offset)
 	if err != nil {
-		// page not found
+		// Page not found
 		return nil, ErrPageNotFound
 	}
-	// otherwise, return new page
+	// otherwise, return new Page
 	return p, nil
 }
 
 // ReadPages attempts to read the pages located at the
 // offset calculated by the provided pageID. It returns
-// an error if a page could not be located
-func (f *PageManager) ReadPages(pid uint32) ([]*page, error) {
-	// calc page offset in PageManager
+// an error if a Page could not be located
+func (f *PageManager) ReadPages(pid uint32) ([]*Page, error) {
+	// calc Page offset in PageManager
 	offset := getPagePosition(pid)
-	// read data into new page
+	// read data into new Page
 	p, err := readPageAt(f.fp, offset)
 	if err != nil {
-		// page not found
+		// Page not found
 		return nil, ErrPageNotFound
 	}
-	// check to ensure it's an overflow page
+	// check to ensure it's an overflow Page
 	if p.header.hasOverflow == 0 {
-		// not an overflow page
+		// not an overflow Page
 		return nil, ErrPageIsNotOverflow
 	}
 	// otherwise, initialize a new set of pages
 	// to append the read overflow pages into
-	var pages []*page
+	var pages []*Page
 	pages = append(pages, p)
 	for p.header.nextPageID > 0 {
-		// calc page offset in PageManager
+		// calc Page offset in PageManager
 		offset = getPagePosition(p.header.nextPageID)
-		// read data into new page
+		// read data into new Page
 		p, err = readPageAt(f.fp, offset)
 		if err != nil {
-			// page not found
+			// Page not found
 			return nil, ErrPageNotFound
 		}
-		// append it to the page set
+		// append it to the Page set
 		pages = append(pages, p)
 	}
-	// finally, return page set
+	// finally, return Page set
 	return pages, nil
 }
 
-// WritePage writes the provided page to the underlying PageManager
+// WritePage writes the provided Page to the underlying PageManager
 // on disk. If something goes wrong it returns a non-nil error
-func (f *PageManager) WritePage(p *page) error {
-	// calc page offset in PageManager
+func (f *PageManager) WritePage(p *Page) error {
+	// calc Page offset in PageManager
 	offset := getPagePosition(p.header.pageID)
-	// write provided page to PageManager
+	// write provided Page to PageManager
 	_, err := writePageAt(f.fp, p, offset)
 	if err != nil {
 		// something happened
@@ -232,14 +233,14 @@ func (f *PageManager) WritePage(p *page) error {
 
 // WritePages writes the provided pages to the underlying PageManager
 // on disk. If something goes wrong it returns a non-nil error
-func (f *PageManager) WritePages(ps []*page) error {
+func (f *PageManager) WritePages(ps []*Page) error {
 	// iterate the pages
 	for i := range ps {
-		// page at index i
+		// Page at index i
 		p := ps[i]
-		// calc page offset in PageManager
+		// calc Page offset in PageManager
 		offset := getPagePosition(p.header.pageID)
-		// write provided page to PageManager
+		// write provided Page to PageManager
 		_, err := writePageAt(f.fp, p, offset)
 		if err != nil {
 			// something happened
@@ -250,12 +251,12 @@ func (f *PageManager) WritePages(ps []*page) error {
 	return nil
 }
 
-// DeletePage marks the page with the matching pageID provided
-// as "free" and writes zeros to the underlying page on disk
+// DeletePage marks the Page with the matching pageID provided
+// as "free" and writes zeros to the underlying Page on disk
 func (f *PageManager) DeletePage(pid uint32) error {
-	// calc page offset in PageManager
+	// calc Page offset in PageManager
 	offset := getPagePosition(pid)
-	// write zeros to the page found
+	// write zeros to the Page found
 	// at "offset" on the underlying
 	// storage PageManager
 	_, err := deletePageAt(f.fp, pid, offset)
@@ -263,12 +264,12 @@ func (f *PageManager) DeletePage(pid uint32) error {
 		// something happened
 		return ErrDeletingPage
 	}
-	// update the page in the
-	// slotted PageManager's page cache
+	// update the Page in the
+	// slotted PageManager's Page cache
 	for i := range f.pageHeaders {
 		if f.pageHeaders[i].pageID == pid {
-			// reset this matching page header
-			// in the page cache to default values
+			// reset this matching Page header
+			// in the Page cache to default values
 			f.pageHeaders[i].freeSpaceLower = pageHeaderSize
 			f.pageHeaders[i].freeSpaceUpper = pageSize
 			f.pageHeaders[i].slotCount = 0
@@ -280,18 +281,18 @@ func (f *PageManager) DeletePage(pid uint32) error {
 }
 
 // GetFreePageIDs returns a list of any
-// page id's that are marked "free"
+// Page id's that are marked "free"
 func (f *PageManager) GetFreePageIDs() []uint32 {
-	// create new empty set of page id's
+	// create new empty set of Page id's
 	var pids []uint32
-	// range the page headers in
-	// the slotted files page cache
+	// range the Page headers in
+	// the slotted files Page cache
 	for i := range f.pageHeaders {
 		if f.pageHeaders[i].PageIsFree() {
 			pids = append(pids, f.pageHeaders[i].pageID)
 		}
 	}
-	// return any free page id's found
+	// return any free Page id's found
 	return pids
 }
 
@@ -308,7 +309,7 @@ func (f *PageManager) Range(start uint32, fn func(rid *RecordID) bool) {
 		p.Range(fn)
 		p, err = f.ReadPage(p.header.nextPageID)
 		if err != nil {
-			panic("something happend while reading next page")
+			panic("something happend while reading next Page")
 		}
 	}
 }

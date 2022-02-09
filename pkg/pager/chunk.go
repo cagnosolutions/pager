@@ -5,7 +5,7 @@ package pager
 //	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 type chunk struct {
-	pages []*page
+	pages []*Page
 }
 
 func genID(cid uint32, i int) uint32 {
@@ -28,10 +28,10 @@ func genPrevID(cid uint32, i int) uint32 {
 
 func _NewChunk(cid uint32) *chunk {
 	c := &chunk{
-		pages: make([]*page, 8),
+		pages: make([]*Page, 8),
 	}
 	for i := range c.pages {
-		c.pages[i] = &page{
+		c.pages[i] = &Page{
 			header: &pageHeader{
 				pageID:         genID(cid, i),
 				nextPageID:     genNextID(cid, i),
