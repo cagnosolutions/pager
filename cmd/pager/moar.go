@@ -38,7 +38,7 @@ func test() {
 	for i := 0; i < 5; i++ {
 		b := make([]byte, 0, 999999)
 		data = append(data, b)
-		fmt.Println(">>>", pager.Sizeof(&data))
+		fmt.Println(">>>", _pager.Sizeof(&data))
 		fmt.Printf("[2]\n")
 		util.PrintMemUsage()
 		time.Sleep(1 * time.Second)
@@ -54,12 +54,12 @@ func test() {
 
 func main() {
 
-	pager.Remove("path/to/data.db")
+	_pager.Remove("path/to/data.db")
 
 	mem := checkMemoryBefore()
 
 	// open an instance of the page manager
-	mgr, err := pager.OpenPageManager("path/to/data.db")
+	mgr, err := _pager.OpenPageManager("path/to/data.db")
 	if err != nil {
 		panic(err)
 	}
@@ -115,7 +115,7 @@ func mainz() {
 	time.Sleep(30 * time.Second)
 
 	// open an instance of the page manager
-	mgr, err := pager.OpenPageManager("path/to/data.db")
+	mgr, err := _pager.OpenPageManager("path/to/data.db")
 	if err != nil {
 		panic(err)
 	}
@@ -124,7 +124,7 @@ func mainz() {
 	fmt.Println("sleeping for 30 seconds...")
 	time.Sleep(30 * time.Second)
 
-	fmt.Printf("[state] opened page manager:\nmanager.size=%d\n", pager.Sizeof(mgr))
+	fmt.Printf("[state] opened page manager:\nmanager.size=%d\n", _pager.Sizeof(mgr))
 
 	// allocate a new page using the page manager
 	pg := mgr.AllocatePage()
@@ -133,7 +133,7 @@ func mainz() {
 	fmt.Println("sleeping for 30 seconds...")
 	time.Sleep(30 * time.Second)
 
-	fmt.Printf("[state] allocated a new page:\npage.size=%d\n", pager.Sizeof(pg))
+	fmt.Printf("[state] allocated a new page:\npage.size=%d\n", _pager.Sizeof(pg))
 
 	// add some data to the page
 	id, err := pg.AddRecord(generateData([]byte{0xDE, 0xAD, 0xBE, 0xEF}, 1000))
@@ -147,7 +147,7 @@ func mainz() {
 	fmt.Println("sleeping for 30 seconds...")
 	time.Sleep(30 * time.Second)
 
-	fmt.Printf("[state] added ~4000 byte record to page:\nmanager.size=%d\n", pager.Sizeof(mgr))
+	fmt.Printf("[state] added ~4000 byte record to page:\nmanager.size=%d\n", _pager.Sizeof(mgr))
 
 	// we can use the page manager to persist the data
 	// to disk
@@ -160,7 +160,7 @@ func mainz() {
 	fmt.Println("sleeping for 30 seconds...")
 	time.Sleep(30 * time.Second)
 
-	fmt.Printf("[state] wrote page to disk:\nmanager.size=%d\n", pager.Sizeof(mgr))
+	fmt.Printf("[state] wrote page to disk:\nmanager.size=%d\n", _pager.Sizeof(mgr))
 
 	// we can also bring the page back into memory
 	// by using the page manager to read the record
@@ -174,7 +174,7 @@ func mainz() {
 	fmt.Println("sleeping for 30 seconds...")
 	time.Sleep(30 * time.Second)
 
-	fmt.Printf("[state] read page from disk:\nmanager.size=%d\n", pager.Sizeof(mgr))
+	fmt.Printf("[state] read page from disk:\nmanager.size=%d\n", _pager.Sizeof(mgr))
 
 	// we can also return a record from the page
 	data, err := pg.GetRecord(id)
@@ -182,7 +182,7 @@ func mainz() {
 		panic(err)
 	}
 	fmt.Printf("id=%v, data=%q\n", id, data)
-	fmt.Printf("[state] got record from page:\nmanager.size=%d\n", pager.Sizeof(mgr))
+	fmt.Printf("[state] got record from page:\nmanager.size=%d\n", _pager.Sizeof(mgr))
 
 	// timeout
 	fmt.Println("sleeping for 30 seconds...")
@@ -225,19 +225,19 @@ func mainz() {
 
 func runMain() {
 	// open an instance of the page manager
-	mgr, err := pager.OpenPageManager("path/to/data.db")
+	mgr, err := _pager.OpenPageManager("path/to/data.db")
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Printf("[state] opened page manager:\nmanager.size=%d\n", pager.Sizeof(mgr))
+	fmt.Printf("[state] opened page manager:\nmanager.size=%d\n", _pager.Sizeof(mgr))
 
 	var mem runtime.MemStats
 	// allocate a new page using the page manager
 	pg := mgr.AllocatePage()
-	pager.PrintStats(mem)
+	_pager.PrintStats(mem)
 
-	fmt.Printf("[state] allocated a new page:\npage.size=%d\n", pager.Sizeof(pg))
+	fmt.Printf("[state] allocated a new page:\npage.size=%d\n", _pager.Sizeof(pg))
 
 	// add some data to the page
 	id, err := pg.AddRecord(generateData([]byte{0xDE, 0xAD, 0xBE, 0xEF}, 1000))
@@ -247,7 +247,7 @@ func runMain() {
 	// **it should be noted that the data we wrote to
 	// the page only exists in memory right now
 
-	fmt.Printf("[state] added ~4000 byte record to page:\nmanager.size=%d\n", pager.Sizeof(mgr))
+	fmt.Printf("[state] added ~4000 byte record to page:\nmanager.size=%d\n", _pager.Sizeof(mgr))
 
 	// we can use the page manager to persist the data
 	// to disk
@@ -256,7 +256,7 @@ func runMain() {
 		panic(err)
 	}
 
-	fmt.Printf("[state] wrote page to disk:\nmanager.size=%d\n", pager.Sizeof(mgr))
+	fmt.Printf("[state] wrote page to disk:\nmanager.size=%d\n", _pager.Sizeof(mgr))
 
 	// we can also bring the page back into memory
 	// by using the page manager to read the record
@@ -266,7 +266,7 @@ func runMain() {
 		panic(err)
 	}
 
-	fmt.Printf("[state] read page from disk:\nmanager.size=%d\n", pager.Sizeof(mgr))
+	fmt.Printf("[state] read page from disk:\nmanager.size=%d\n", _pager.Sizeof(mgr))
 
 	// we can also return a record from the page
 	data, err := pg.GetRecord(id)
@@ -275,7 +275,7 @@ func runMain() {
 	}
 	fmt.Printf("id=%v, data=%q\n", id, data)
 
-	fmt.Printf("[state] got record from page:\nmanager.size=%d\n", pager.Sizeof(mgr))
+	fmt.Printf("[state] got record from page:\nmanager.size=%d\n", _pager.Sizeof(mgr))
 
 	// we can also delete a record from the page
 	err = pg.DelRecord(id)

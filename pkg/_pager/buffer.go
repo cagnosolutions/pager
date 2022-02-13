@@ -1,4 +1,4 @@
-package pager
+package _pager
 
 type pageMeta struct {
 	isDirty   bool

@@ -1,4 +1,4 @@
-package pager
+package _pager
 
 const (
 	// used in Page

@@ -17,13 +17,13 @@ func testOverflowPage() {
 	name := fmt.Sprintf("cmd/storage/pageman/data/overflow-%.4x.db", 1)
 
 	// remove file
-	err := pager.Remove(name)
+	err := _pager.Remove(name)
 	if err != nil {
 		fmt.Errorf("[file] remove: %s", err)
 	}
 
 	// open file
-	f, err := pager.OpenPageManager(name)
+	f, err := _pager.OpenPageManager(name)
 	if err != nil {
 		fmt.Errorf("[file] open: %s", err)
 	}
@@ -44,7 +44,7 @@ func testOverflowPage() {
 		fmt.Errorf("[page] add record: %s", err)
 	}
 
-	f.Range(p1.PageID(), func(rid *pager.RecordID) bool {
+	f.Range(p1.PageID(), func(rid *_pager.RecordID) bool {
 		rec, _ := p1.GetRecord(rid)
 		fmt.Printf("%v => %q\n", rid, rec)
 		return true
@@ -84,13 +84,13 @@ func testRecordPrefix() {
 	name := fmt.Sprintf("cmd/storage/pageman/data/file-%.4x.db", 1)
 
 	// remove file
-	err := pager.Remove(name)
+	err := _pager.Remove(name)
 	if err != nil {
 		fmt.Errorf("[file] remove: %s", err)
 	}
 
 	// open file
-	f, err := pager.OpenPageManager(name)
+	f, err := _pager.OpenPageManager(name)
 	if err != nil {
 		fmt.Errorf("[file] open: %s", err)
 	}
@@ -118,7 +118,7 @@ func testRecordPrefix() {
 	}
 
 	// range the records
-	p.Range(func(rid *pager.RecordID) bool {
+	p.Range(func(rid *_pager.RecordID) bool {
 		rec, _ := p.GetRecord(rid)
 		fmt.Printf("%v => %q\n", rid, rec)
 		return true
@@ -141,24 +141,24 @@ func pageMan() {
 	name := fmt.Sprintf("cmd/storage/pageman/data/file-%.4x.db", 1)
 
 	// remove file
-	err := pager.Remove(name)
+	err := _pager.Remove(name)
 	if err != nil {
 		fmt.Errorf("[file] remove: %s", err)
 	}
 
 	// open file
-	f, err := pager.OpenPageManager(name)
+	f, err := _pager.OpenPageManager(name)
 	if err != nil {
 		fmt.Errorf("[file] open: %s", err)
 	}
 
 	// create a record id "holder"
-	pgmap := make(map[uint32][]*pager.RecordID)
+	pgmap := make(map[uint32][]*_pager.RecordID)
 
 	for i := 0; i < 8; i++ {
 		// allocate a new page
 		pg := f.AllocatePage()
-		var recs []*pager.RecordID
+		var recs []*_pager.RecordID
 		// add some records to it
 		for j := 0; j < 16; j++ {
 			rec := fmt.Sprintf("this-is-record-number-%.6x", j)
@@ -184,7 +184,7 @@ func pageMan() {
 	}
 
 	// open file again
-	f, err = pager.OpenPageManager(name)
+	f, err = _pager.OpenPageManager(name)
 	if err != nil {
 		fmt.Errorf("[file] open: %s", err)
 	}
@@ -207,7 +207,7 @@ func pageMan() {
 				fmt.Errorf("[file] read: %s", err)
 			}
 			// range page
-			pg.Range(func(rid *pager.RecordID) bool {
+			pg.Range(func(rid *_pager.RecordID) bool {
 				// isolate even records
 				if rid.SlotID%2 == 0 {
 					// remove record if it's even
@@ -251,7 +251,7 @@ func pageMan() {
 	fmt.Printf("[THIS IS PAGE 2]\n%s\n", pg2)
 
 	// range page two
-	pg2.Range(func(rid *pager.RecordID) bool {
+	pg2.Range(func(rid *_pager.RecordID) bool {
 		fmt.Printf("page=2, rid=%v\n", rid)
 		return true
 	})
@@ -279,7 +279,7 @@ func pageMan() {
 	fmt.Printf("[THIS IS PAGE 2]\n%s\n", pg2)
 
 	// range page two
-	pg2.Range(func(rid *pager.RecordID) bool {
+	pg2.Range(func(rid *_pager.RecordID) bool {
 		fmt.Printf("page=2, rid=%v\n", rid)
 		return true
 	})

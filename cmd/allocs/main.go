@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/cagnosolutions/pager/pkg/pager"
+	"github.com/cagnosolutions/pager/pkg/_pager"
 	"github.com/cagnosolutions/pager/pkg/util"
 	"runtime"
 	"time"
@@ -63,11 +63,11 @@ func pageAllocations() {
 	// memory should be no higher than 150KB
 	util.PrintMemUsage()
 
-	var overall []*pager.Page
+	var overall []*_pager.Page
 	for i := 0; i < 256; i++ {
 
 		// Allocate memory
-		p := pager.NewPage(uint32(i))
+		p := _pager.NewPage(uint32(i))
 		overall = append(overall, p)
 
 		// Print our memory usage at each interval

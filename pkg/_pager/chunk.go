@@ -1,4 +1,4 @@
-package pager
+package _pager
 
 //	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //	NOTE: this file will most likely be removed soon...

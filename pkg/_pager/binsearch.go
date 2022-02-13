@@ -1,4 +1,4 @@
-package pager
+package _pager
 
 func BinarySearch(set []int, find int) int {
 	// declare for later
