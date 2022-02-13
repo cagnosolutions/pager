@@ -8,6 +8,10 @@ const (
 	MinRecordSize  = pageSlotSize
 	MaxRecordSize  = pageSize - pageHeaderSize - pageSlotSize
 
+	// used in Cache
+	cacheSize      = 2 << 20
+	cachePageCount = cacheSize / pageSize
+
 	// used in PageBuffer
 	defaultBufferedPageCount = 8
 )

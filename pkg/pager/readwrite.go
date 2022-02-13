@@ -17,6 +17,30 @@ import (
 	reserved       uint16
 */
 
+// PageReader reads a pageSize of bytes into p starting at
+// offset off in the underlying input source. It returns
+// the number of bytes read and any error encountered
+//
+// If ReadPage is reading from an input source with a seek
+// offset, ReadPage should not affect nor be affected by
+// the underlying seek offset.
+type PageReader interface {
+	ReadPage(p []byte, off int64) (n int, err error)
+}
+
+// PageWriter writes a pageSize of bytes from p to the under-
+// lying data stream at offset off. It returns the number of
+// bytes written from p and any error encountered that caused
+// the write to stop early. WritePage must return a non-nil
+// error if it returns n < a pageSize.
+//
+// If WritePage is writing to a destination with a seek offset,
+// WritePage should not affect nor be affected by the underlying
+// seek offset.
+type PageWriter interface {
+	WritePage(p []byte, off int64) (n int, err error)
+}
+
 func readPageHeader(r io.ReadSeeker, h *pageHeader) (int, error) {
 	// make header buffer to read data into
 	buf := make([]byte, pageHeaderSize)
