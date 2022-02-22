@@ -3,6 +3,7 @@ package pager
 import "errors"
 
 var (
+	ErrBadPageSize             = errors.New("raw-page: got incorrect or misaligned page size")
 	ErrBadAlignmentSize        = errors.New("pageManagerFile: bad alignment size")
 	ErrNoMoreRoomInPage        = errors.New("Page: there is not enough room left in the Page")
 	ErrInvalidRecordID         = errors.New("Page: invalid record id")

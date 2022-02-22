@@ -1,4 +1,4 @@
-package _pager
+package pager
 
 import (
 	"fmt"

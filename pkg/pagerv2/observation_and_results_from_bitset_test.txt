@@ -1,0 +1,77 @@
+**N is the number of items inserted in each set. I
+used a []int (for the slice), a map[int]int (which
+is the best performing map type), and a bitmap
+of []uint64. Each test was run half a dozen times
+to get a good average result. The ns/op results
+were rounded to the nearest average. Some
+interesting things were, the map direct lookup
+always had a variance of 1-2ns every time it ran.
+Another interesting note is that the bitmap had
+kind of a ceiling of 4092 (which isn't surprising)
+seeing that the OS deals with swapping chunks
+of memory in this size. Otherwise, the ranging of
+the map, the slice and the bitmap were mostly
+linear. The bitmap is pretty darn quick for range
+scans with datasets no larger than 4096 entries.
+
+N = 65536
+FindInSlice                  20000 ns/op
+FindInMapRange      800000 ns/op
+FindInMapDirect                8 ns/op (+/- 1-2ns)
+FindInBitmap                  500 ns/op (100% slower than 32768)
+
+N = 32768
+FindInSlice                  10000 ns/op
+FindInMapRange      400000 ns/op
+FindInMapDirect                9 ns/op (+/- 1-2ns)
+FindInBitmap                 250 ns/op (66% slower than 16384)
+
+N = 16384
+FindInSlice                32000 ns/op
+FindInMapRange    180000 ns/op
+FindInMapDirect            10 ns/op (+/- 1-2ns)
+FindInBitmap                150 ns/op (50% slower than 8192)
+
+N = 8192
+FindInSlice                2800 ns/op
+FindInMapRange    78000 ns/op
+FindInMapDirect          10 ns/op (+/- 1-2ns)
+FindInBitmap              100 ns/op (100% slower than 4096)
+
+N = 4096
+FindInSlice                1400 ns/op
+FindInMapRange    32000 ns/op
+FindInMapDirect          10 ns/op (+/- 1-2ns)
+FindInBitmap               50 ns/op (66% slower than 2048)
+
+N = 2048
+FindInSlice                  700 ns/op
+FindInMapRange    16000 ns/op
+FindInMapDirect           9 ns/op (+/- 1-2ns)
+FindInBitmap               30 ns/op (50% slower than 1024)
+
+N = 1024
+FindInSlice                  300 ns/op
+FindInMapRange     6000 ns/op
+FindInMapDirect           8 ns/op (+/- 1-2ns)
+FindInBitmap               20 ns/op (33% slower than 512)
+
+N = 512
+FindInSlice                 150 ns/op
+FindInMapRange     3000 ns/op
+FindInMapDirect           8 ns/op
+FindInBitmap               15 ns/op (25% slower than 128)
+
+N = 128
+FindInSlice                   50 ns/op
+FindInMapRange       600 ns/op
+FindInMapDirect           8 ns/op
+FindInBitmap               12 ns/op (20% slower than 64)
+
+N = 64
+FindInSlice                   15 ns/op
+FindInMapRange       300 ns/op
+FindInMapDirect           8 ns/op
+FindInBitmap               10 ns/op
+
+**Setting N < 64 did not yield significantly better results

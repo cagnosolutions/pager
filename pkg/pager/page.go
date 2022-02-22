@@ -1,4 +1,4 @@
-package psager
+package pager
 
 import (
 	"bytes"
@@ -82,7 +82,7 @@ type pageHeader struct {
 // FreeSpace returns the total (contiguous) free
 // space in bytes that is left in this Page
 func (h *pageHeader) FreeSpace() uint16 {
-	return h.freeSpaceUpper - h.freeSpaceLower //- (pageSlotSize * 1 * h.slotCount)
+	return h.freeSpaceUpper - h.freeSpaceLower // - (pageSlotSize * 1 * h.slotCount)
 }
 
 // PageIsFree reports if the Page has been allocated
@@ -214,7 +214,9 @@ func (p *Page) getAvailableSlot(recordSize uint16) *pageSlot {
 // useFreePageSlotRecord uses an existing Page slot record provided. it
 // attempts to use the same record offset (if it will fit) otherwise, it
 // will find another location in the Page and update the header accordingly
-func (p *Page) useFreePageSlotRecord(slot *pageSlot, recordSize uint16) *pageSlot {
+func (p *Page) useFreePageSlotRecord(
+	slot *pageSlot, recordSize uint16,
+) *pageSlot {
 	// no need to increment the slotCount however
 	// we do need to decrement the freeSlotCount
 	p.header.freeSlotCount--
@@ -265,12 +267,14 @@ func (p *Page) addNewPageSlotRecord(recordSize uint16) *pageSlot {
 	// the byte offset where the record
 	// will be copied to within the Page
 	// along with the length of the record
-	p.slots = append(p.slots, &pageSlot{
-		itemID:     p.header.slotCount - 1,
-		itemStatus: itemStatusUsed,
-		itemOffset: p.header.freeSpaceUpper,
-		itemLength: recordSize,
-	})
+	p.slots = append(
+		p.slots, &pageSlot{
+			itemID:     p.header.slotCount - 1,
+			itemStatus: itemStatusUsed,
+			itemOffset: p.header.freeSpaceUpper,
+			itemLength: recordSize,
+		},
+	)
 	// return the last pageSlot we entered
 	return p.slots[p.header.slotCount-1]
 }
@@ -413,10 +417,12 @@ func (p *Page) Range(fn func(rid *RecordID) bool) {
 		if p.slots[i].itemStatus == itemStatusFree {
 			continue
 		}
-		if !fn(&RecordID{
-			PageID: p.header.pageID,
-			SlotID: uint16(i),
-		}) {
+		if !fn(
+			&RecordID{
+				PageID: p.header.pageID,
+				SlotID: uint16(i),
+			},
+		) {
 			break
 		}
 	}
