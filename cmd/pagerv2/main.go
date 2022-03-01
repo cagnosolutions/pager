@@ -9,8 +9,13 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/arl/statsviz"
+	"github.com/cagnosolutions/appstats/pkg/appstats"
 )
+
+func init() {
+	// register and run
+	appstats.Serve(":8080")
+}
 
 func main() {
 	ds := NewDS()
@@ -20,8 +25,8 @@ func main() {
 	mux.Handle("/data/get/all", handleGetAll(ds))
 	mux.Handle("/data/del/", handleDelID(ds))
 	mux.Handle("/data/add/a/ton", handleAddATon(ds))
-	statsviz.Register(mux)
-	log.Println(http.ListenAndServe("localhost:6060", mux))
+	// appstats.Register(mux)
+	log.Println(http.ListenAndServe(":6060", mux))
 }
 
 const (

@@ -1,4 +1,2 @@
-github.com/arl/statsviz v0.4.1 h1:y41S3SFt34JBHayhuPeMuNB2d/je9TaUVD8WIv0E8yA=
-github.com/arl/statsviz v0.4.1/go.mod h1:KeK558gUzFtRXk6Cz7fEPJwtiCio03WXu04g7HrjHPM=
-github.com/gorilla/websocket v1.4.2 h1:+/TMaTYc4QFitKJxsQ7Yye35DkWvkdLcvGKqM+x0Ufc=
-github.com/gorilla/websocket v1.4.2/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
+github.com/cagnosolutions/appstats v0.0.0-20220222214706-e87aca0b46f7 h1:oTgWuNZx8i36oBVZIRucty0SL8YnUCi58HYXH+sE+ZE=
+github.com/cagnosolutions/appstats v0.0.0-20220222214706-e87aca0b46f7/go.mod h1:bj1EVTazgmsXstE4p5KkFUxvIKjg/4PzjOGqJaCVh7g=
