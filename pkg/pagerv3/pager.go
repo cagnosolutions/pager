@@ -43,5 +43,42 @@ type Pager interface {
 	DeleteRecord(pid PageID, rid RecordID) error
 }
 
-type PageID uint32
-type RecordID uint32
+type (
+	PageID   uint32
+	RecordID uint32
+	FrameID  uint32
+)
+
+type Manager interface {
+
+	// NewPage allocates a new page and pins it to a frame. If we did not
+	// find an open frame we will proceed by attempting to victimize the
+	// current frame.
+	NewPage() *Page
+
+	// FetchPage fetches the requested page from the buffer pool. If the
+	// page is in cache, it is returned immediately. If not, it will be
+	// found on disk, loaded into the cache and returned.
+	FetchPage(pid PageID) *Page
+
+	// UnpinPage unpins the target page from the buffer pool. It indicates
+	// that the page is not used any more for the current requesting thread.
+	// If no more threads are using this page, the page is considered for
+	// eviction (victim).
+	UnpinPage(pid PageID) error
+
+	// FlushPage flushes the target page that is in the cache onto the
+	// underlying medium. It also decrements the pin count and unpins it
+	// from the holding frame and unsets the dirty bit.
+	FlushPage(pid PageID) bool
+
+	// DeletePage deletes a page from the buffer pool. Once removed, it
+	// marks the holding fame as free to use.
+	DeletePage(pid PageID) error
+
+	// GetFrameID returns a frame ID from the free list, or by using the
+	// replacement policy if the free list is full along with a boolean
+	// indicating true if the frame ID was returned using the free list
+	// and false if it was returned by using the replacement policy.
+	GetFrameID() (FrameID, bool)
+}

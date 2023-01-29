@@ -32,10 +32,10 @@ func PutSlotSetPool(ss slotSet) {
 // a single entry is 8 bytes
 type entries []byte
 
-func (e entries) Swap(i, j int) {
+func (e entries) _Swap(i, j int) {
 	// basically what im looking
 	// to get is something like...
-	e[i:i+8], e[j:j+8] = e[j:j+8], e[i:i+8]
+	// e[i:i+8], e[j:j+8] = e[j:j+8], e[i:i+8]
 	// ^ but that doesn't work, lol
 }
 

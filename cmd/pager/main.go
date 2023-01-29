@@ -2,14 +2,15 @@ package main
 
 import (
 	"fmt"
-	"github.com/cagnosolutions/pager/pkg/pager"
+
+	"github.com/cagnosolutions/pager/pkg/_pager"
 )
 
 func _main() {
-	//main2()
-	//testOverflowPage()
-	//pageMan()
-	//testRecordPrefix()
+	// main2()
+	// testOverflowPage()
+	// pageMan()
+	// testRecordPrefix()
 }
 
 func testOverflowPage() {
@@ -44,25 +45,27 @@ func testOverflowPage() {
 		fmt.Errorf("[page] add record: %s", err)
 	}
 
-	f.Range(p1.PageID(), func(rid *_pager.RecordID) bool {
-		rec, _ := p1.GetRecord(rid)
-		fmt.Printf("%v => %q\n", rid, rec)
-		return true
-	})
+	f.Range(
+		p1.PageID(), func(rid *_pager.RecordID) bool {
+			rec, _ := p1.GetRecord(rid)
+			fmt.Printf("%v => %q\n", rid, rec)
+			return true
+		},
+	)
 
-	//p1.Range(func(rid *pager.RecordID) bool {
+	// p1.Range(func(rid *pager.RecordID) bool {
 	//	rec, _ := p1.GetRecord(rid)
 	//	fmt.Printf("%v => %q\n", rid, rec)
 	//	return true
-	//})
-	//p2.Range(func(rid *pager.RecordID) bool {
+	// })
+	// p2.Range(func(rid *pager.RecordID) bool {
 	//	rec, _ := p2.GetRecord(rid)
 	//	fmt.Printf("%v => %q\n", rid, rec)
 	//	return true
-	//})
+	// })
 
 	// sort the records
-	//p.SortRecords()
+	// p.SortRecords()
 
 	// close file
 	err = f.Close()
@@ -118,14 +121,16 @@ func testRecordPrefix() {
 	}
 
 	// range the records
-	p.Range(func(rid *_pager.RecordID) bool {
-		rec, _ := p.GetRecord(rid)
-		fmt.Printf("%v => %q\n", rid, rec)
-		return true
-	})
+	p.Range(
+		func(rid *_pager.RecordID) bool {
+			rec, _ := p.GetRecord(rid)
+			fmt.Printf("%v => %q\n", rid, rec)
+			return true
+		},
+	)
 
 	// sort the records
-	//p.SortRecords()
+	// p.SortRecords()
 
 	// close file
 	err = f.Close()
@@ -207,17 +212,19 @@ func pageMan() {
 				fmt.Errorf("[file] read: %s", err)
 			}
 			// range page
-			pg.Range(func(rid *_pager.RecordID) bool {
-				// isolate even records
-				if rid.SlotID%2 == 0 {
-					// remove record if it's even
-					err = pg.DelRecord(rid)
-					if err != nil {
-						fmt.Errorf("[page] delete: %s", err)
+			pg.Range(
+				func(rid *_pager.RecordID) bool {
+					// isolate even records
+					if rid.SlotID%2 == 0 {
+						// remove record if it's even
+						err = pg.DelRecord(rid)
+						if err != nil {
+							fmt.Errorf("[page] delete: %s", err)
+						}
 					}
-				}
-				return true
-			})
+					return true
+				},
+			)
 			// save page
 			err = f.WritePage(pg)
 			if err != nil {
@@ -251,10 +258,12 @@ func pageMan() {
 	fmt.Printf("[THIS IS PAGE 2]\n%s\n", pg2)
 
 	// range page two
-	pg2.Range(func(rid *_pager.RecordID) bool {
-		fmt.Printf("page=2, rid=%v\n", rid)
-		return true
-	})
+	pg2.Range(
+		func(rid *_pager.RecordID) bool {
+			fmt.Printf("page=2, rid=%v\n", rid)
+			return true
+		},
+	)
 
 	// add some records
 	id, err := pg2.AddRecord([]byte("new record #2"))
@@ -279,10 +288,12 @@ func pageMan() {
 	fmt.Printf("[THIS IS PAGE 2]\n%s\n", pg2)
 
 	// range page two
-	pg2.Range(func(rid *_pager.RecordID) bool {
-		fmt.Printf("page=2, rid=%v\n", rid)
-		return true
-	})
+	pg2.Range(
+		func(rid *_pager.RecordID) bool {
+			fmt.Printf("page=2, rid=%v\n", rid)
+			return true
+		},
+	)
 
 	// save page
 	err = f.WritePage(pg2)

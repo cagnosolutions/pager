@@ -3,10 +3,11 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/cagnosolutions/pager/pkg/pager"
-	"github.com/cagnosolutions/pager/pkg/util"
 	"runtime"
 	"time"
+
+	"github.com/cagnosolutions/pager/pkg/_pager"
+	"github.com/cagnosolutions/pager/pkg/util"
 )
 
 func generateData(data []byte, repeat int) []byte {
@@ -25,7 +26,10 @@ func printMemoryCheckAfter(stats *runtime.MemStats) {
 	if mem.Alloc <= stats.Alloc {
 		fmt.Printf("Mem allocated: 0 MB\n")
 	} else {
-		fmt.Printf("Mem allocated: %3.3f MB (%3.3f KB)\n", float64(mem.Alloc-stats.Alloc)/(1024*1024), float64(mem.Alloc-stats.Alloc)/(1024))
+		fmt.Printf(
+			"Mem allocated: %3.3f MB (%3.3f KB)\n", float64(mem.Alloc-stats.Alloc)/(1024*1024),
+			float64(mem.Alloc-stats.Alloc)/(1024),
+		)
 	}
 }
 

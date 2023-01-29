@@ -3,14 +3,20 @@ package pager
 import (
 	"bytes"
 	"encoding/binary"
+	"log"
 	"sort"
-	"sync"
 )
 
-
+// https://go.dev/play/p/Oia48UwbIt8
 
 // page is a raw page sized []byte
 type page []byte
+
+func NewRawPage(pid uint32) page {
+	pg := make([]byte, pageSize)
+	initPage(pg, pid)
+	return pg
+}
 
 // initPage initializes a fresh page in the page space provided and encodes the
 // header with the page id provided
@@ -150,6 +156,7 @@ func (p page) writeRecord(rec []byte) (uint32, error) {
 	if recordSize > MaxRecordSize {
 		return 0, ErrMaxRecordSize
 	}
+	log.Printf("recordSize=%d, freeSpace=%d\n", recordSize, p.freeSpace())
 	if recordSize > int(p.freeSpace()) {
 		return 0, ErrNoMoreRoomInPage
 	}
@@ -166,10 +173,83 @@ func (p page) writeRecord(rec []byte) (uint32, error) {
 	p.sortSlotsByRecordPrefix()
 	// all went well, return the newly added
 	// records' id along with a nil error
-	return &RecordID{
-		PageID: p.header.pageID,
-		SlotID: s.itemID,
-	}, nil
+	return uint32(sid), nil
+}
+
+func (p page) readRecord(rid uint) ([]byte, error) {
+	// check to make sure the RecordID
+	// is not an invalid record id
+	if rid <= 0 || rid > uint(p.getSlotCount()) {
+		return nil, ErrInvalidRecordID
+	}
+	// locate the proper slot in the
+	// Page using the supplied *RecordID
+	sid := getSlotNOffset(int(rid))
+	// check the item status in the found slot
+	// to ensure it has not already been marked
+	// as a free slot (aka, can still be used)
+	if getSlotStatus(p, sid) == itemStatusFree {
+		// item status has been marked free
+		// which means it has been freed up
+		// or removed
+		return nil, ErrRecordHasBeenMarkedFree
+	}
+	// create a new buffer to copy the
+	// record data into (so we are not
+	// returning a pointer to the base
+	// data, which would be unsafe)
+	data := make([]byte, getSlotLength(p, sid))
+	// get the record offsets for
+	// an easier time copying
+	beg, end := p.slotEntryBounds(sid)
+	// copy the record data into the
+	// newly created buffer, and return
+	copy(data, p[beg:end])
+	// return the record data along
+	// with a nil error
+	return data, nil
+}
+
+func (p page) removeRecord(rid uint) error {
+	// check to make sure the RecordID
+	// is not an invalid record id
+	if rid <= 0 || rid > uint(p.getSlotCount()) {
+		return ErrInvalidRecordID
+	}
+	// locate the proper slot in the
+	// Page using the supplied *RecordID
+	sid := getSlotNOffset(int(rid))
+	// check the item status in the found slot
+	// to ensure it has not already been marked
+	// as a free slot (aka, can still be used)
+	if getSlotStatus(p, sid) == itemStatusFree {
+		// item status has been marked free
+		// which means it has been freed up
+		// or removed
+		return nil
+	}
+	// otherwise, we must now mark the found
+	// slot as a free item which is now the
+	// in pool to be re-used at a later date.
+	setSlotStatus(p, sid, itemStatusFree)
+	// next, we should overwrite the item
+	// record with zero's to minimize the
+	// potential for data corruption if
+	// the space is ever reused or compacted.
+	zeros := make([]byte, getSlotLength(p, sid))
+	// get the record offsets for an easier
+	// time copying
+	beg, end := p.slotEntryBounds(sid)
+	// copy the record data into the
+	// newly created buffer, and return
+	copy(p[beg:end], zeros)
+	// make sure to increment the free
+	// slot count
+	fsc := p.getFreeSlotCount()
+	fsc++
+	p.setFreeSlotCount(fsc)
+	// with a nil error
+	return nil
 }
 
 // Len is here to satisfy the sort interface for
@@ -189,6 +269,8 @@ func (p page) Swap(i, j int) {
 	slotJu64 := binary.LittleEndian.Uint64(slotJ)
 	// swap slots `i` and `j`
 	slotIu64, slotJu64 = slotJu64, slotIu64
+	// create slot pool
+	sp := make([]byte, pageSlotSize)
 	// copy slot `i` into our slot pool
 	copy(sp, slotI)
 	// copy slot `j` into slot `i`
@@ -209,22 +291,10 @@ func (p page) Less(i, j int) bool {
 
 // https://go.dev/play/p/Tx0PwDL1UW1
 
-
 // sortSlotsByRecordPrefix is a wrapper for sorting the page slots by the
 // record prefix
 func (p page) sortSlotsByRecordPrefix() {
-	ss := p.slotsToSlotSet()
-	sort.Stable(slots)
-	p.slotSetToSlots(ss)
-}
-
-func (p page) slotsToSlotSet() slotSet {
-	set := make(slotSet, p.getSlotCount())
-	for i := range set {
-		set[i].slotID
-		set[i].
-
-	}
+	sort.Stable(p[pageHeaderSize : p.getSlotCount()*pageSlotSize])
 }
 
 func (p page) getPageID() uint32 {
@@ -363,23 +433,33 @@ func (p page) slotToU64(slotNum int) uint64 {
 	// bounds check hint to compiler; see golang.org/issue/14808
 	_ = p[pageSize-1]
 	slotOffset := getSlotNOffset(slotNum)
-	return bindata.Uint64(p[slotOffset:slotOffset+pageSlotSize])
+	return bindata.Uint64(p[slotOffset : slotOffset+pageSlotSize])
 }
 
 func (p page) AddRecord(rec []byte) (uint, error) {
-	return 0, nil
+	rid, err := p.writeRecord(rec)
+	return uint(rid), err
 }
 
-func (p page) GetRecord(rec []byte) (uint, error) {
-	return 0, nil
+func (p page) GetRecord(rid uint) ([]byte, error) {
+	rec, err := p.readRecord(rid)
+	return rec, err
 }
 
-func (p page) DelRecord(rec []byte) (uint, error) {
-	return 0, nil
+func (p page) DelRecord(rid uint) error {
+	err := p.removeRecord(rid)
+	return err
 }
 
-func (p page) RangeRecords(fn func(rec []byte) bool) {
-
+func (p page) Range(fn func(rid uint) bool) {
+	for i := 0; i < int(p.getSlotCount()); i++ {
+		if getSlotStatus(p, i) == itemStatusFree {
+			continue
+		}
+		if !fn(uint(getSlotID(p, i))) {
+			break
+		}
+	}
 }
 
 func (p page) Reset() {
@@ -421,5 +501,5 @@ func (p page) writeNewPageHeader(pid uint32) {
 	binary.LittleEndian.PutUint16(p[n:n+2], 0)
 	n += 2
 	// return bytes encoded
-	return n
+	// return n
 }

@@ -20,94 +20,94 @@ func setFreshHeader(p []byte, pid uint32) {
 }
 
 /*
-	Setter functions for getting values from raw pages
+Setter functions for getting values from raw pages
 */
 func setPageID(b []byte, pageID uint32) {
 	_ = b[3] // early bounds check to guarantee safety of writes below
-	bindata.PutUint32(b, pageID)
+	bindata.PutUint32(b[0:4], pageID)
 }
 
 func setNextPageID(b []byte, nextPageID uint32) {
 	_ = b[3] // early bounds check to guarantee safety of writes below
-	bindata.PutUint32(b, nextPageID)
+	bindata.PutUint32(b[4:8], nextPageID)
 }
 
 func setPrevPageID(b []byte, prevPageID uint32) {
 	_ = b[3] // early bounds check to guarantee safety of writes below
-	bindata.PutUint32(b, prevPageID)
+	bindata.PutUint32(b[8:12], prevPageID)
 }
 
 func setFreeSpaceLower(b []byte, freeSpaceLower uint16) {
 	_ = b[1] // early bounds check to guarantee safety of writes below
-	bindata.PutUint16(b, freeSpaceLower)
+	bindata.PutUint16(b[12:14], freeSpaceLower)
 }
 
 func setFreeSpaceUpper(b []byte, freeSpaceUpper uint16) {
 	_ = b[1] // early bounds check to guarantee safety of writes below
-	bindata.PutUint16(b, freeSpaceUpper)
+	bindata.PutUint16(b[14:16], freeSpaceUpper)
 }
 
 func setSlotCount(b []byte, slotCount uint16) {
 	_ = b[1] // early bounds check to guarantee safety of writes below
-	bindata.PutUint16(b, slotCount)
+	bindata.PutUint16(b[16:18], slotCount)
 }
 
 func setFreeSlotCount(b []byte, freeSlotCount uint16) {
 	_ = b[1] // early bounds check to guarantee safety of writes below
-	bindata.PutUint16(b, freeSlotCount)
+	bindata.PutUint16(b[18:20], freeSlotCount)
 }
 
 func setHasOverflow(b []byte, hasOverflow uint16) {
 	_ = b[1] // early bounds check to guarantee safety of writes below
-	bindata.PutUint16(b, hasOverflow)
+	bindata.PutUint16(b[20:22], hasOverflow)
 }
 
 func setReserved(b []byte, reserved uint16) {
 	_ = b[1] // early bounds check to guarantee safety of writes below
-	bindata.PutUint16(b, reserved)
+	bindata.PutUint16(b[22:24], reserved)
 }
 
 /*
-	Getter functions for getting values from raw pages
+Getter functions for getting values from raw pages
 */
 func getPageID(b []byte) uint32 {
 	_ = b[3] // bounds check hint to compiler; see golang.org/issue/14808
-	return bindata.Uint32(b)
+	return bindata.Uint32(b[0:4])
 }
 
 func getNextPageID(b []byte) uint32 {
 	_ = b[3] // bounds check hint to compiler; see golang.org/issue/14808
-	return bindata.Uint32(b)
+	return bindata.Uint32(b[4:8])
 }
 
 func getPrevPageID(b []byte) uint32 {
 	_ = b[3] // bounds check hint to compiler; see golang.org/issue/14808
-	return bindata.Uint32(b)
+	return bindata.Uint32(b[8:12])
 }
 
 func getFreeSpaceLower(b []byte) uint16 {
 	_ = b[1] // bounds check hint to compiler; see golang.org/issue/14808
-	return bindata.Uint16(b)
+	return bindata.Uint16(b[12:14])
 }
 
 func getFreeSpaceUpper(b []byte) uint16 {
 	_ = b[1] // bounds check hint to compiler; see golang.org/issue/14808
-	return bindata.Uint16(b)
+	return bindata.Uint16(b[14:18])
 }
 
 func getSlotCount(b []byte) uint16 {
 	_ = b[1] // bounds check hint to compiler; see golang.org/issue/14808
-	return bindata.Uint16(b)
+	return bindata.Uint16(b[18:20])
 }
 
 func getFreeSlotCount(b []byte) uint16 {
 	_ = b[1] // bounds check hint to compiler; see golang.org/issue/14808
-	return bindata.Uint16(b)
+	return bindata.Uint16(b[20:22])
 }
 
 func getHasOverflow(b []byte) uint16 {
 	_ = b[1] // bounds check hint to compiler; see golang.org/issue/14808
-	return bindata.Uint16(b)
+	return bindata.Uint16(b[22:24])
 }
 
 func getReserved(b []byte) uint16 {
